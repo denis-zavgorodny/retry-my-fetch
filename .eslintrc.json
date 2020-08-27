@@ -1,0 +1,17 @@
+{
+  "extends": ["airbnb-base", "plugin:json/recommended", "plugin:md/recommended"],
+  "overrides": [
+    {
+      "files": ["*.md"],
+      "parser": "markdown-eslint-parser"
+    }
+  ],
+  "plugins": ["jest"],
+  "env": {
+    "browser": true,
+    "commonjs": true,
+    "es6": true,
+    "node": true,
+    "jest/globals": true
+  }
+}
