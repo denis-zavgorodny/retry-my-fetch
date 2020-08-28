@@ -1,25 +1,41 @@
 interface beforeRefetch {
-  (code: number, counter: number): Promise<any>
+  (code: number, counter: number): Promise<any>;
 }
 
 interface decoratorOptions {
-  beforeRefetch: beforeRefetch,
-  maxTryCount?: number,
+  beforeRefetch: beforeRefetch;
+  maxTryCount?: number;
 }
 
+interface fetchOptions {
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  mode: RequestMode;
+  cache: RequestCache;
+  credentials: RequestCredentials;
+  headers: Headers;
+  redirect: RequestRedirect;
+  referrerPolicy: 'no-referrer' | 'client';
+  body: string;
+}
 
-function retryMyFetch<A extends string, B extends object , T extends (url:A, options: B) => Promise<any>>(http:T, params: decoratorOptions):Function {
-  let counter:number = 0;
-  const caller = function<T>(url:A, options: B) {
+interface Fetch {
+  (url: string, options: fetchOptions): Promise<Response>;
+}
+
+function retryMyFetch(http: Fetch, params: decoratorOptions): Fetch {
+  let counter = 0;
+  const caller: Fetch = function (url: string, options: fetchOptions) {
     const { beforeRefetch, maxTryCount = 5 } = params;
     return new Promise((resolve, reject) => {
-      http(url, options).then(data => {
-        if(data.ok !== true) {
-          counter++;
-          if(counter <= maxTryCount) {
-            beforeRefetch(200, counter).then(() => {
-              caller(url, options).then(resolve).catch(reject);
-            }).catch(reject);
+      http(url, options).then((data) => {
+        if (data.ok !== true) {
+          counter += 1;
+          if (counter <= maxTryCount) {
+            beforeRefetch(200, counter)
+              .then(() => {
+                caller(url, options).then(resolve).catch(reject);
+              })
+              .catch(reject);
           } else {
             reject(data);
           }
@@ -28,12 +44,8 @@ function retryMyFetch<A extends string, B extends object , T extends (url:A, opt
         }
       });
     });
-  }
+  };
   return caller;
 }
 
 export default retryMyFetch;
-
-
-
-

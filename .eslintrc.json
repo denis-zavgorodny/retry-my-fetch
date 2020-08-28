@@ -1,12 +1,19 @@
 {
-  "extends": ["airbnb-base", "plugin:json/recommended", "plugin:md/recommended"],
+  "parser": "@typescript-eslint/parser",
+  "extends": [
+    "airbnb-base",
+    "plugin:json/recommended",
+    "plugin:md/recommended",
+    "plugin:@typescript-eslint/eslint-recommended",
+    "plugin:@typescript-eslint/recommended"
+  ],
   "overrides": [
     {
       "files": ["*.md"],
       "parser": "markdown-eslint-parser"
     }
   ],
-  "plugins": ["jest"],
+  "plugins": ["jest", "@typescript-eslint"],
   "env": {
     "browser": true,
     "commonjs": true,
