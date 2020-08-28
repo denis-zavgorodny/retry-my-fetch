@@ -1,5 +1,5 @@
 interface beforeRefetch {
-  (code: number, counter: number): Promise<any>;
+  (code: number, counter: number): Promise<Response>;
 }
 
 interface decoratorOptions {
