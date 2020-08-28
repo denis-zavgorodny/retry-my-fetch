@@ -1,8 +1,11 @@
 {
   "name": "retry-my-fetch",
-  "version": "1.0.0",
+  "version": "1.0.0.rc.1",
   "description": "",
   "main": "dist/index.js",
+  "files": [
+    "./dist/**"
+  ],
   "scripts": {
     "build": "webpack  --mode production --progress --profile --colors",
     "dev:watch": "webpack --mode development --progress --profile --colors --watch",
@@ -10,7 +13,7 @@
     "test": "jest",
     "test:watch": "jest --watch"
   },
-  "author": "",
+  "author": "Denis Zavgorodny",
   "license": "ISC",
   "devDependencies": {
     "@babel/core": "^7.11.0",
