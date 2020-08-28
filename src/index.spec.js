@@ -19,19 +19,21 @@ describe('retryMyFetch', () => {
       });
     });
     it('should resolve data like a fetch', (done) => {
-      testFetch('/').then((response) => {
-        expect(response).toEqual({
-          ok: true,
-          status: 200,
-          toJSON: expect.any(Function),
+      testFetch('/')
+        .then((response) => {
+          expect(response).toEqual({
+            ok: true,
+            status: 200,
+            toJSON: expect.any(Function),
+          });
+          return response.toJSON();
+        })
+        .then((data) => {
+          expect(data).toEqual({
+            some: '1',
+          });
+          done();
         });
-        return response.toJSON();
-      }).then((data) => {
-        expect(data).toEqual({
-          some: '1',
-        });
-        done();
-      });
     });
   });
 
@@ -58,7 +60,9 @@ describe('retryMyFetch', () => {
       });
     });
     describe('when max attempts are not reached', () => {
+      let beforeRefetch;
       beforeEach(() => {
+        beforeRefetch = jest.fn().mockResolvedValue(true);
         fetchMock
           .mockResolvedValueOnce({
             ok: false,
@@ -71,24 +75,34 @@ describe('retryMyFetch', () => {
             toJSON: jest.fn().mockReturnValue({ success: 'data' }),
           });
         testFetch = retryMyFetch(fetchMock, {
-          beforeRefetch: (statusCode, counter) => Promise.resolve(statusCode, counter),
+          beforeRefetch,
           maxTryCount: 3,
         });
       });
+      afterEach(() => {
+        beforeRefetch.mockClear();
+      });
       it('should resolve data like a fetch', (done) => {
-        testFetch('/').then((response) => {
-          expect(response).toEqual({
-            ok: true,
-            status: 200,
-            toJSON: expect.any(Function),
+        testFetch('/')
+          .then((response) => {
+            expect(response).toEqual({
+              ok: true,
+              status: 200,
+              toJSON: expect.any(Function),
+            });
+            return response.toJSON();
+          })
+          .then((data) => {
+            expect(data).toEqual({
+              success: 'data',
+            });
+            done();
           });
-          return response.toJSON();
-        }).then((data) => {
-          expect(data).toEqual({
-            success: 'data',
-          });
-          done();
-        });
+      });
+      it('should call beforeRefetch twice', async () => {
+        await testFetch('/');
+        expect(beforeRefetch).toBeCalledTimes(1);
+        expect(beforeRefetch).toHaveBeenNthCalledWith(1, 400, 1);
       });
     });
   });

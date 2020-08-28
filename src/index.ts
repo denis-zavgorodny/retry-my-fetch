@@ -31,7 +31,7 @@ function retryMyFetch(http: Fetch, params: decoratorOptions): Fetch {
         if (data.ok !== true) {
           counter += 1;
           if (counter <= maxTryCount) {
-            beforeRefetch(200, counter)
+            beforeRefetch(data.status, counter)
               .then(() => {
                 caller(url, options).then(resolve).catch(reject);
               })
