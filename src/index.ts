@@ -1,5 +1,5 @@
 interface beforeRefetch {
-  (code: number, counter: number): Promise<Response>;
+  (url: string, code: number, counter: number): Promise<Response>;
 }
 
 interface decoratorOptions {
@@ -31,7 +31,7 @@ function retryMyFetch(http: Fetch, params: decoratorOptions): Fetch {
         if (data.ok !== true) {
           counter += 1;
           if (counter <= maxTryCount) {
-            beforeRefetch(data.status, counter)
+            beforeRefetch(url, data.status, counter)
               .then(() => {
                 caller(url, options).then(resolve).catch(reject);
               })

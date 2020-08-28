@@ -102,7 +102,7 @@ describe('retryMyFetch', () => {
       it('should call beforeRefetch twice', async () => {
         await testFetch('/');
         expect(beforeRefetch).toBeCalledTimes(1);
-        expect(beforeRefetch).toHaveBeenNthCalledWith(1, 400, 1);
+        expect(beforeRefetch).toHaveBeenNthCalledWith(1, '/', 400, 1);
       });
     });
   });
