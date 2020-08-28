@@ -14,6 +14,7 @@
     "test:watch": "jest --watch"
   },
   "author": "Denis Zavgorodny",
+  "repository": "git@github.com:denis-zavgorodny/retry-my-fetch.git",
   "license": "ISC",
   "devDependencies": {
     "@babel/core": "^7.11.0",
