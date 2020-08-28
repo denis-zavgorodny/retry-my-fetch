@@ -2,7 +2,7 @@
   "name": "retry-my-fetch",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "build": "webpack  --mode production --progress --profile --colors",
     "dev:watch": "webpack --mode development --progress --profile --colors --watch",
@@ -14,9 +14,12 @@
   "license": "ISC",
   "devDependencies": {
     "@babel/core": "^7.11.0",
+    "@babel/plugin-transform-runtime": "^7.11.0",
     "@babel/preset-env": "^7.11.0",
+    "@babel/preset-typescript": "^7.10.4",
     "babel-loader": "^8.1.0",
     "babel-preset-env": "^1.7.0",
+    "declaration-bundler-webpack-plugin": "^1.0.3",
     "eslint": "^7.6.0",
     "eslint-config-airbnb": "^18.2.0",
     "eslint-config-airbnb-base": "^14.2.0",
@@ -33,5 +36,8 @@
     "typescript": "^4.0.2",
     "webpack": "^4.44.1",
     "webpack-cli": "^3.3.12"
+  },
+  "dependencies": {
+    "@types/isomorphic-fetch": "0.0.35"
   }
 }
