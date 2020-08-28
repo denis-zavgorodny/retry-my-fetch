@@ -61,49 +61,83 @@ describe('retryMyFetch', () => {
     });
     describe('when max attempts are not reached', () => {
       describe('when beforeRefetch is passed', () => {
-        let beforeRefetch;
-        beforeEach(() => {
-          beforeRefetch = jest.fn().mockResolvedValue(true);
-          fetchMock
-            .mockResolvedValueOnce({
-              ok: false,
-              status: 400,
-              toJSON: jest.fn().mockReturnValue({ status: 'fail' }),
-            })
-            .mockResolvedValue({
-              ok: true,
-              status: 200,
-              toJSON: jest.fn().mockReturnValue({ success: 'data' }),
-            });
-          testFetch = retryMyFetch(fetchMock, {
-            beforeRefetch,
-            maxTryCount: 3,
-          });
-        });
-        afterEach(() => {
-          beforeRefetch.mockClear();
-        });
-        it('should resolve data like a fetch', (done) => {
-          testFetch('/')
-            .then((response) => {
-              expect(response).toEqual({
+        describe('when beforeRefetch is resolved', () => {
+          let beforeRefetch;
+          beforeEach(() => {
+            beforeRefetch = jest.fn().mockResolvedValue(true);
+            fetchMock
+              .mockResolvedValueOnce({
+                ok: false,
+                status: 400,
+                toJSON: jest.fn().mockReturnValue({ status: 'fail' }),
+              })
+              .mockResolvedValue({
                 ok: true,
                 status: 200,
-                toJSON: expect.any(Function),
+                toJSON: jest.fn().mockReturnValue({ success: 'data' }),
               });
-              return response.toJSON();
-            })
-            .then((data) => {
-              expect(data).toEqual({
-                success: 'data',
-              });
-              done();
+            testFetch = retryMyFetch(fetchMock, {
+              beforeRefetch,
+              maxTryCount: 3,
             });
+          });
+          afterEach(() => {
+            beforeRefetch.mockClear();
+          });
+          it('should resolve data like a fetch', (done) => {
+            testFetch('/')
+              .then((response) => {
+                expect(response).toEqual({
+                  ok: true,
+                  status: 200,
+                  toJSON: expect.any(Function),
+                });
+                return response.toJSON();
+              })
+              .then((data) => {
+                expect(data).toEqual({
+                  success: 'data',
+                });
+                done();
+              });
+          });
+          it('should call beforeRefetch twice', async () => {
+            await testFetch('/');
+            expect(beforeRefetch).toBeCalledTimes(1);
+            expect(beforeRefetch).toHaveBeenNthCalledWith(1, '/', 400, 1);
+          });
         });
-        it('should call beforeRefetch twice', async () => {
-          await testFetch('/');
-          expect(beforeRefetch).toBeCalledTimes(1);
-          expect(beforeRefetch).toHaveBeenNthCalledWith(1, '/', 400, 1);
+        describe('when beforeRefetch is rejected', () => {
+          let beforeRefetch;
+          beforeEach(() => {
+            beforeRefetch = jest.fn().mockRejectedValue();
+            fetchMock
+              .mockResolvedValueOnce({
+                ok: false,
+                status: 400,
+                toJSON: jest.fn().mockReturnValue({ status: 'fail' }),
+              })
+              .mockResolvedValue({
+                ok: true,
+                status: 200,
+                toJSON: jest.fn().mockReturnValue({ success: 'data' }),
+              });
+            testFetch = retryMyFetch(fetchMock, {
+              beforeRefetch,
+              maxTryCount: 3,
+            });
+          });
+          afterEach(() => {
+            beforeRefetch.mockClear();
+          });
+          it('should reject with response data', async () => {
+            expect.assertions(1);
+            await expect(testFetch('/')).rejects.toEqual({
+              ok: false,
+              status: 400,
+              toJSON: expect.any(Function),
+            });
+          });
         });
       });
 

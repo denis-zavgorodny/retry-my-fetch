@@ -36,7 +36,9 @@ function retryMyFetch(http: Fetch, params: decoratorOptions): Fetch {
               .then(() => {
                 caller(url, options).then(resolve).catch(reject);
               })
-              .catch(reject);
+              .catch(() => {
+                reject(data);
+              });
           } else {
             reject(data);
           }
