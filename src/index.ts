@@ -8,7 +8,7 @@ interface decoratorOptions {
 }
 
 interface fetchOptions {
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTIONS' | 'CONNECT' | 'TRACE';
   mode: RequestMode;
   cache: RequestCache;
   credentials: RequestCredentials;
