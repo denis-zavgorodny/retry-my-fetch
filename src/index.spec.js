@@ -102,9 +102,19 @@ describe('retryMyFetch', () => {
               });
           });
           it('should call beforeRefetch twice', async () => {
-            await testFetch('/');
+            await testFetch('/', {
+              some: 'options',
+            });
             expect(beforeRefetch).toBeCalledTimes(1);
-            expect(beforeRefetch).toHaveBeenNthCalledWith(1, '/', 400, 1);
+            expect(beforeRefetch).toHaveBeenNthCalledWith(
+              1,
+              '/',
+              {
+                some: 'options',
+              },
+              400,
+              1,
+            );
           });
         });
         describe('when beforeRefetch is rejected', () => {
