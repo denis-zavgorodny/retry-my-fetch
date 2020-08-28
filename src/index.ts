@@ -1,5 +1,5 @@
 interface beforeRefetch {
-  (url: string, code: number, counter: number): Promise<Response>;
+  (url: string, code: number, counter: number): Promise<void>;
 }
 
 interface decoratorOptions {
@@ -24,8 +24,9 @@ interface Fetch {
 
 function retryMyFetch(http: Fetch, params: decoratorOptions): Fetch {
   let counter = 0;
+  const defaultRefreshCallback: beforeRefetch = () => Promise.resolve();
   const caller: Fetch = function (url: string, options: fetchOptions) {
-    const { beforeRefetch, maxTryCount = 5 } = params;
+    const { beforeRefetch = defaultRefreshCallback, maxTryCount = 5 } = params;
     return new Promise((resolve, reject) => {
       http(url, options).then((data) => {
         if (data.ok !== true) {
