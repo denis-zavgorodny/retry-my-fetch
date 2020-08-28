@@ -1,9 +1,11 @@
 {
   "name": "@denis.zavgorodny/retry-my-fetch",
-  "version": "1.0.0-rc.1",
+  "version": "1.0.0-rc.2",
   "main": "dist/index.js",
   "files": [
-    "./dist/**"
+    "./dist/**",
+    "./dist/index.d.ts",
+    "index.js.map"
   ],
   "scripts": {
     "build": "webpack  --mode production --progress --profile --colors",
