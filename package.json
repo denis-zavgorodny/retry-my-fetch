@@ -1,7 +1,6 @@
 {
-  "name": "retry-my-fetch",
+  "name": "@denis.zavgorodny/retry-my-fetch",
   "version": "1.0.0-rc.1",
-  "description": "",
   "main": "dist/index.js",
   "files": [
     "./dist/**"
@@ -14,7 +13,10 @@
     "test:watch": "jest --watch"
   },
   "author": "Denis Zavgorodny",
-  "repository": "git@github.com:denis-zavgorodny/retry-my-fetch.git",
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/denis-zavgorodny/retry-my-fetch.git"
+  },
   "license": "ISC",
   "devDependencies": {
     "@babel/core": "^7.11.0",
@@ -57,5 +59,10 @@
       "eslint --fix",
       "prettier --write"
     ]
-  }
+  },
+  "bugs": {
+    "url": "https://github.com/denis-zavgorodny/retry-my-fetch/issues"
+  },
+  "homepage": "https://github.com/denis-zavgorodny/retry-my-fetch#readme",
+  "description": ""
 }
