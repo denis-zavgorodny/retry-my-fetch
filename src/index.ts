@@ -27,25 +27,26 @@ function retryMyFetch(http: Fetch, params: decoratorOptions): Fetch {
   const caller: Fetch = function (url: string, options: fetchOptions) {
     const defaultRefreshCallback: beforeRefetch = () => Promise.resolve(options);
     const { beforeRefetch = defaultRefreshCallback, maxTryCount = 5 } = params;
+
     return new Promise((resolve, reject) => {
-      http(url, options).then((data) => {
-        if (data.ok !== true) {
-          counter += 1;
-          if (counter <= maxTryCount) {
-            beforeRefetch(url, options, data.status, counter)
-              .then((updatedOptions) => {
-                caller(url, updatedOptions).then(resolve).catch(reject);
-              })
-              .catch(() => {
-                reject(data);
-              });
-          } else {
-            reject(data);
-          }
-        } else {
-          resolve(data);
-        }
-      });
+      function prepareRefetch(data: Response) {
+        beforeRefetch(url, options, data.status, counter)
+          .then((updatedOptions) => {
+            caller(url, updatedOptions).then(resolve).catch(reject);
+          })
+          .catch(() => reject(data));
+      }
+
+      function isOutOfAttempts(): boolean {
+        counter += 1;
+
+        return counter > maxTryCount;
+      }
+
+      http(url, options)
+        .then((data) => (data.ok ? resolve(data) : data))
+        .then((data) => (isOutOfAttempts() ? reject(data) : data))
+        .then(prepareRefetch);
     });
   };
   return caller;
