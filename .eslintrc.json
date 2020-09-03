@@ -13,7 +13,30 @@
       "parser": "markdown-eslint-parser"
     }
   ],
-  "plugins": ["jest", "@typescript-eslint"],
+  "plugins": ["jest", "@typescript-eslint", "import"],
+  "rules": {
+    "import/extensions": [
+      "error",
+      "ignorePackages",
+      {
+        "js": "never",
+        "mjs": "never",
+        "jsx": "never",
+        "ts": "never",
+        "tsx": "never"
+      }
+    ]
+  },
+  "settings": {
+    "import/parsers": {
+      "@typescript-eslint/parser": [".ts", ".tsx"]
+    },
+    "import/resolver": {
+      "node": {
+        "extensions": [".js", ".jsx", ".ts", ".tsx"]
+      }
+    }
+  },
   "env": {
     "browser": true,
     "commonjs": true,
