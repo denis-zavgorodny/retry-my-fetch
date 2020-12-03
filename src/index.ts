@@ -9,34 +9,35 @@ function retryMyFetch(http: Fetch, params: decoratorOptions): Fetch {
     return new Promise((resolve, reject) => {
       status.whenWillIdle().then(() => {
         http(url, options).then((data) => {
-          if (data.ok !== true) {
-            status.setBusy();
-            counter += 1;
-            if (counter <= maxTryCount) {
-              beforeRefetch(url, options, data.status, counter)
-                .then((updatedOptions) => {
+          if (data.ok === true) {
+            resolve(data);
+            return;
+          }
+
+          status.setBusy();
+          counter += 1;
+          if (counter > maxTryCount) {
+            status.setIdle();
+            reject(data);
+            return;
+          }
+          beforeRefetch(url, options, data.status, counter)
+            .then((updatedOptions) => {
+              status.setIdle();
+              caller(url, updatedOptions)
+                .then((resolvedData) => {
                   status.setIdle();
-                  caller(url, updatedOptions)
-                    .then((resolvedData) => {
-                      status.setIdle();
-                      resolve(resolvedData);
-                    })
-                    .catch((e) => {
-                      status.setIdle();
-                      reject(e);
-                    });
+                  resolve(resolvedData);
                 })
-                .catch(() => {
+                .catch((e) => {
                   status.setIdle();
-                  reject(data);
+                  reject(e);
                 });
-            } else {
+            })
+            .catch(() => {
               status.setIdle();
               reject(data);
-            }
-          } else {
-            resolve(data);
-          }
+            });
         });
       });
     });
