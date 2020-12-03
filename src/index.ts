@@ -18,7 +18,7 @@ function retryMyFetch(http: Fetch, params: decoratorOptions): Fetch {
           counter += 1;
           if (counter > maxTryCount) {
             status.setIdle();
-            reject(data);
+            resolve(data);
             return;
           }
           beforeRefetch(url, options, data.status, counter)

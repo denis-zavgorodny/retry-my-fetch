@@ -50,9 +50,9 @@ describe('retryMyFetch', () => {
           maxTryCount: 3,
         });
       });
-      it('should reject with response data', async () => {
+      it('should resolve data like a fetch', async () => {
         expect.assertions(1);
-        await expect(testFetch('/')).rejects.toEqual({
+        await expect(testFetch('/')).resolves.toEqual({
           ok: false,
           status: 400,
           toJSON: expect.any(Function),
@@ -140,7 +140,7 @@ describe('retryMyFetch', () => {
           afterEach(() => {
             beforeRefetch.mockClear();
           });
-          it('should reject with response data', async () => {
+          it('should reject with error', async () => {
             expect.assertions(1);
             await expect(testFetch('/')).rejects.toEqual(new Error('error'));
           });
