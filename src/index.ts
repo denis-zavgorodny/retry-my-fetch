@@ -24,19 +24,14 @@ function retryMyFetch(http: Fetch, params: decoratorOptions): Fetch {
           beforeRefetch(url, options, data.status, counter)
             .then((updatedOptions) => {
               status.setIdle();
-              caller(url, updatedOptions)
-                .then((resolvedData) => {
-                  status.setIdle();
-                  resolve(resolvedData);
-                })
-                .catch((e) => {
-                  status.setIdle();
-                  reject(e);
-                });
+              return caller(url, updatedOptions).then((resolvedData) => {
+                status.setIdle();
+                resolve(resolvedData);
+              });
             })
-            .catch(() => {
+            .catch((e) => {
               status.setIdle();
-              reject(data);
+              reject(e);
             });
         });
       });

@@ -1,4 +1,4 @@
-import retryMyFetch from './index.ts';
+import retryMyFetch from './index';
 
 describe('retryMyFetch', () => {
   const fetchMock = jest.fn();
@@ -120,7 +120,7 @@ describe('retryMyFetch', () => {
         describe('when beforeRefetch is rejected', () => {
           let beforeRefetch;
           beforeEach(() => {
-            beforeRefetch = jest.fn().mockRejectedValue();
+            beforeRefetch = jest.fn().mockRejectedValue(new Error('error'));
             fetchMock
               .mockResolvedValueOnce({
                 ok: false,
@@ -142,11 +142,7 @@ describe('retryMyFetch', () => {
           });
           it('should reject with response data', async () => {
             expect.assertions(1);
-            await expect(testFetch('/')).rejects.toEqual({
-              ok: false,
-              status: 400,
-              toJSON: expect.any(Function),
-            });
+            await expect(testFetch('/')).rejects.toEqual(new Error('error'));
           });
         });
       });
