@@ -28,12 +28,7 @@ fetchWithRetry('/').then(console.log);
 import retryMyFetch from 'retry-my-fetch';
 
 const config = {
-  beforeRefetch: () =>
-    new Promise((resolve) => {
-      setTimeout(() => {
-        resolve();
-      }, 1000);
-    }),
+  timeout: 3000, // it should call next retry after 3 sec
   maxTryCount: 5,
 };
 const fetchWithRetry = retryMyFetch(fetch, config);
