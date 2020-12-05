@@ -6,6 +6,9 @@ describe('retryMyFetch', () => {
   const fetchedData = {
     some: '1',
   };
+  afterEach(() => {
+    fetchMock.mockClear();
+  });
   describe('when status `ok` is true', () => {
     beforeEach(() => {
       fetchMock.mockResolvedValue({
@@ -62,59 +65,129 @@ describe('retryMyFetch', () => {
     describe('when max attempts are not reached', () => {
       describe('when beforeRefetch is passed', () => {
         describe('when beforeRefetch is resolved', () => {
-          let beforeRefetch;
-          beforeEach(() => {
-            beforeRefetch = jest.fn().mockResolvedValue(true);
-            fetchMock
-              .mockResolvedValueOnce({
-                ok: false,
-                status: 400,
-                toJSON: jest.fn().mockReturnValue({ status: 'fail' }),
-              })
-              .mockResolvedValue({
-                ok: true,
-                status: 200,
-                toJSON: jest.fn().mockReturnValue({ success: 'data' }),
-              });
-            testFetch = retryMyFetch(fetchMock, {
-              beforeRefetch,
-              maxTryCount: 3,
-            });
-          });
-          afterEach(() => {
-            beforeRefetch.mockClear();
-          });
-          it('should resolve data like a fetch', (done) => {
-            testFetch('/')
-              .then((response) => {
-                expect(response).toEqual({
+          describe('when beforeRefetch returns value', () => {
+            let beforeRefetch;
+            beforeEach(() => {
+              beforeRefetch = jest.fn().mockResolvedValue('some new conf');
+              fetchMock
+                .mockResolvedValueOnce({
+                  ok: false,
+                  status: 400,
+                  toJSON: jest.fn().mockReturnValue({ status: 'fail' }),
+                })
+                .mockResolvedValue({
                   ok: true,
                   status: 200,
-                  toJSON: expect.any(Function),
+                  toJSON: jest.fn().mockReturnValue({ success: 'data' }),
                 });
-                return response.toJSON();
-              })
-              .then((data) => {
-                expect(data).toEqual({
-                  success: 'data',
-                });
-                done();
+              testFetch = retryMyFetch(fetchMock, {
+                beforeRefetch,
+                maxTryCount: 3,
               });
-          });
-          it('should call beforeRefetch twice', async () => {
-            await testFetch('/', {
-              some: 'options',
             });
-            expect(beforeRefetch).toBeCalledTimes(1);
-            expect(beforeRefetch).toHaveBeenNthCalledWith(
-              1,
-              '/',
-              {
+            afterEach(() => {
+              beforeRefetch.mockClear();
+            });
+            it('should call fetchMock', async () => {
+              await testFetch('/', 'some conf');
+              expect(fetchMock).toBeCalledTimes(2);
+              expect(fetchMock.mock.calls[0]).toEqual(['/', 'some conf']);
+              expect(fetchMock.mock.calls[1]).toEqual(['/', 'some new conf']);
+            });
+            it('should resolve data like a fetch', (done) => {
+              testFetch('/')
+                .then((response) => {
+                  expect(response).toEqual({
+                    ok: true,
+                    status: 200,
+                    toJSON: expect.any(Function),
+                  });
+                  return response.toJSON();
+                })
+                .then((data) => {
+                  expect(data).toEqual({
+                    success: 'data',
+                  });
+                  done();
+                });
+            });
+            it('should call beforeRefetch twice', async () => {
+              await testFetch('/', {
                 some: 'options',
-              },
-              400,
-              1,
-            );
+              });
+              expect(beforeRefetch).toBeCalledTimes(1);
+              expect(beforeRefetch).toHaveBeenNthCalledWith(
+                1,
+                '/',
+                {
+                  some: 'options',
+                },
+                400,
+                1,
+              );
+            });
+          });
+          describe('when beforeRefetch does not return value', () => {
+            let beforeRefetch;
+            beforeEach(() => {
+              beforeRefetch = jest.fn().mockResolvedValue();
+              fetchMock
+                .mockResolvedValueOnce({
+                  ok: false,
+                  status: 400,
+                  toJSON: jest.fn().mockReturnValue({ status: 'fail' }),
+                })
+                .mockResolvedValue({
+                  ok: true,
+                  status: 200,
+                  toJSON: jest.fn().mockReturnValue({ success: 'data' }),
+                });
+              testFetch = retryMyFetch(fetchMock, {
+                beforeRefetch,
+                maxTryCount: 3,
+              });
+            });
+            afterEach(() => {
+              beforeRefetch.mockClear();
+            });
+            it('should call fetchMock', async () => {
+              await testFetch('/', 'some conf');
+              expect(fetchMock).toBeCalledTimes(2);
+              expect(fetchMock.mock.calls[0]).toEqual(['/', 'some conf']);
+              expect(fetchMock.mock.calls[1]).toEqual(['/', 'some conf']);
+            });
+            it('should resolve data like a fetch', (done) => {
+              testFetch('/')
+                .then((response) => {
+                  expect(response).toEqual({
+                    ok: true,
+                    status: 200,
+                    toJSON: expect.any(Function),
+                  });
+                  return response.toJSON();
+                })
+                .then((data) => {
+                  expect(data).toEqual({
+                    success: 'data',
+                  });
+                  done();
+                });
+            });
+            it('should call beforeRefetch twice', async () => {
+              await testFetch('/', {
+                some: 'options',
+              });
+              expect(beforeRefetch).toBeCalledTimes(1);
+              expect(beforeRefetch).toHaveBeenNthCalledWith(
+                1,
+                '/',
+                {
+                  some: 'options',
+                },
+                400,
+                1,
+              );
+            });
           });
         });
         describe('when beforeRefetch is rejected', () => {
@@ -141,8 +214,10 @@ describe('retryMyFetch', () => {
             beforeRefetch.mockClear();
           });
           it('should reject with error', async () => {
-            expect.assertions(1);
-            await expect(testFetch('/')).rejects.toEqual(new Error('error'));
+            expect.assertions(3);
+            await expect(testFetch('/', 'some other conf')).rejects.toEqual(new Error('error'));
+            expect(fetchMock).toBeCalledTimes(1);
+            expect(fetchMock).toBeCalledWith('/', 'some other conf');
           });
         });
       });
@@ -163,6 +238,12 @@ describe('retryMyFetch', () => {
           testFetch = retryMyFetch(fetchMock, {
             maxTryCount: 3,
           });
+        });
+        it('should call fetchMock', async () => {
+          await testFetch('/', 'some conf');
+          expect(fetchMock).toBeCalledTimes(2);
+          expect(fetchMock.mock.calls[0]).toEqual(['/', 'some conf']);
+          expect(fetchMock.mock.calls[1]).toEqual(['/', 'some conf']);
         });
         it('should resolve data like a fetch', (done) => {
           testFetch('/')

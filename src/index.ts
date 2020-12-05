@@ -19,7 +19,7 @@ function retryMyFetch(http: Fetch, params: decoratorOptions): Fetch {
       status.setBusy();
       const updatedOptions = await beforeRefetch(url, options, data.status, counter);
       status.setIdle();
-      return caller(url, updatedOptions);
+      return caller(url, updatedOptions || options);
     } catch (error) {
       status.setIdle();
       throw error;
