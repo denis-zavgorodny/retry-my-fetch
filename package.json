@@ -8,6 +8,7 @@
   ],
   "scripts": {
     "build": "webpack  --mode production --progress --profile --colors",
+    "publish": "npm run test && npm run build && npm publish",
     "dev:watch": "webpack --mode development --progress --profile --colors --watch",
     "prettier": "npx prettier --write . ",
     "test": "jest",
