@@ -13,14 +13,10 @@ function retryMyFetch(http: Fetch, params: decoratorOptions): Fetch {
       const data = await http(url, options);
       counter += 1;
 
-      if (data.ok === true || counter > maxTryCount) {
-        status.setIdle();
-        return data;
-      }
+      if (data.ok === true || counter > maxTryCount) return data;
 
       await status.whenWillIdle();
       status.setBusy();
-
       const updatedOptions = await beforeRefetch(url, options, data.status, counter);
       status.setIdle();
       return caller(url, updatedOptions);
