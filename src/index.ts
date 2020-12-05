@@ -10,26 +10,20 @@ function retryMyFetch(http: Fetch, params: decoratorOptions): Fetch {
     try {
       const defaultRefreshCallback: beforeRefetchInterface = () => Promise.resolve(options);
       const { beforeRefetch = defaultRefreshCallback, maxTryCount = 5 } = params;
+      const data = await http(url, options);
+      counter += 1;
+
+      if (data.ok === true || counter > maxTryCount) {
+        status.setIdle();
+        return data;
+      }
+
       await status.whenWillIdle();
       status.setBusy();
-      const data = await http(url, options);
-
-      if (data.ok === true) {
-        status.setIdle();
-        return data;
-      }
-
-      counter += 1;
-      if (counter > maxTryCount) {
-        status.setIdle();
-        return data;
-      }
 
       const updatedOptions = await beforeRefetch(url, options, data.status, counter);
       status.setIdle();
-      const resolvedData = await caller(url, updatedOptions);
-      status.setIdle();
-      return resolvedData;
+      return caller(url, updatedOptions);
     } catch (error) {
       status.setIdle();
       throw error;
