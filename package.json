@@ -1,6 +1,6 @@
 {
   "name": "@denis.zavgorodny/retry-my-fetch",
-  "version": "1.0.0-rc.8",
+  "version": "1.0.0-rc.9",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
