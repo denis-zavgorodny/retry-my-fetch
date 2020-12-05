@@ -10,6 +10,38 @@ npm i retry-my-fetch
 
 ## Quick start
 
+### Simple retry
+
+```js
+import retryMyFetch from 'retry-my-fetch';
+
+const config = {
+  maxTryCount: 5,
+};
+const fetchWithRetry = retryMyFetch(fetch, config);
+fetchWithRetry('/').then(console.log);
+```
+
+### Retry with timeout
+
+```js
+import retryMyFetch from 'retry-my-fetch';
+
+const config = {
+  beforeRefetch: () =>
+    new Promise((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, 1000);
+    }),
+  maxTryCount: 5,
+};
+const fetchWithRetry = retryMyFetch(fetch, config);
+fetchWithRetry('/').then(console.log);
+```
+
+### Update JWT token and retry
+
 ```js
 import retryMyFetch from 'retry-my-fetch';
 
