@@ -20,7 +20,9 @@ const config = {
     // update fetch options
     const newFetchOptions = {
       ...fetchOptions,
-      Authorization: `Bearer: ${newAccessToken}`,
+      headers: new Headers({
+        Authorization: `Bearer ${newAccessToken}`,
+      }),
     };
 
     // return new options in order to retry call with new options
@@ -29,7 +31,12 @@ const config = {
   maxTryCount: 5,
 };
 const fetchWithRetry = retryMyFetch(fetch, config);
-fetchWithRetry('/').then(console.log);
+const options = {
+  headers: new Headers({
+    Authorization: `Bearer ${someOldToken}`,
+  }),
+};
+fetchWithRetry('/', options).then(console.log);
 ```
 
 See `src/interfaces.ts` for further details.
