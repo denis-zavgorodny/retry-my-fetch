@@ -5,6 +5,7 @@ export interface beforeRefetchInterface {
 export interface decoratorOptions {
   beforeRefetch: beforeRefetchInterface;
   maxTryCount?: number;
+  timeout?: number;
 }
 
 export interface fetchOptions {
