@@ -131,6 +131,7 @@ describe('retryMyFetch', () => {
                 },
                 400,
                 1,
+                false,
               );
             });
           });
@@ -193,6 +194,7 @@ describe('retryMyFetch', () => {
                 },
                 400,
                 1,
+                false,
               );
             });
           });
