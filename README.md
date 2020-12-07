@@ -66,4 +66,49 @@ const options = {
 fetchWithRetry('/', options).then(console.log);
 ```
 
+### Use AbortController
+
+The AbortController interface
+represents a controller object that allows you to abort one or more
+Web requests as and when desired.
+
+```js
+import retryMyFetch from 'retry-my-fetch';
+
+const config = {
+  useAbortController: true,
+  beforeRefetch: async (
+    url,
+    fetchOptions,
+    statusCode,
+    retryConter,
+    isRejected,
+  ) => {
+    const token = getCurrentToken();
+    if (!isRejected) {
+      // do something, i.e. refresh JWT token
+      const freshAccessToken = await getToken(); // some async function
+    }
+    // update fetch options
+    const newFetchOptions = {
+      ...fetchOptions,
+      headers: new Headers({
+        Authorization: `Bearer ${isRejected ? token : freshAccessToken}`,
+      }),
+    };
+
+    // return new options in order to retry call with new options
+    return newFetchOptions;
+  },
+  maxTryCount: 5,
+};
+const fetchWithRetry = retryMyFetch(fetch, config);
+const options = {
+  headers: new Headers({
+    Authorization: `Bearer ${someOldToken}`,
+  }),
+};
+fetchWithRetry('/', options).then(console.log);
+```
+
 See `src/interfaces.ts` for further details.
