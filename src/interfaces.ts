@@ -1,11 +1,14 @@
 export interface beforeRefetchInterface {
-  (url: string, options: fetchOptions, code: number, counter: number): Promise<fetchOptions>;
+  (url: string, options: fetchOptions, code: number, counter: number, isRejected: boolean): Promise<
+    fetchOptions
+  >;
 }
 
 export interface decoratorOptions {
   beforeRefetch: beforeRefetchInterface;
   maxTryCount?: number;
   timeout?: number;
+  useAbortController?: boolean;
 }
 
 export interface fetchOptions {
@@ -17,6 +20,7 @@ export interface fetchOptions {
   redirect: RequestRedirect;
   referrerPolicy: 'no-referrer' | 'client';
   body: string;
+  signal?: AbortSignal;
 }
 
 export interface Fetch {

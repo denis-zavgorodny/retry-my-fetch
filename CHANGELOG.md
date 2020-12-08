@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.2.0
+
+- use AbortController API
+
 ## 1.1.0
 
 - use initial options in case if beforeRefetch resolves with no data
