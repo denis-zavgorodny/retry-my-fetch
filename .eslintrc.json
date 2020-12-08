@@ -3,7 +3,7 @@
   "extends": [
     "airbnb-base",
     "plugin:json/recommended",
-    "plugin:md/recommended",
+    "plugin:markdown/recommended",
     "plugin:@typescript-eslint/eslint-recommended",
     "plugin:@typescript-eslint/recommended"
   ],
@@ -11,6 +11,17 @@
     {
       "files": ["*.md"],
       "parser": "markdown-eslint-parser"
+    },
+    {
+      "files": ["*.md/*.js"],
+      "rules": {
+        "import/no-unresolved": "off",
+        "no-undef": "off",
+        "no-unused-vars": "off",
+        "no-console": "off",
+        "padded-blocks": "off",
+        "@typescript-eslint/no-unused-vars": "off"
+      }
     }
   ],
   "plugins": ["jest", "@typescript-eslint", "import"],
