@@ -1,6 +1,6 @@
 # Change Log
 
-## dev
+## 1.2.0
 
 - use AbortController API
 
