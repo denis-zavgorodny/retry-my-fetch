@@ -78,7 +78,7 @@ import retryMyFetch from 'retry-my-fetch';
 const beforeRefetch = async (url, fetchOptions, statusCode, retryConter, isRejected) => {
   const token = getCurrentToken();
   if (!isRejected) {
-    // do something, i.e. refresh JWT token
+    // refresh JWT token
     const freshAccessToken = await getToken(); // some async function
   }
   // update and return new options in order to retry call with new options
