@@ -14,7 +14,7 @@ function retryMyFetch(http: Fetch, params: decoratorOptions): Fetch {
   if (useAbortController) initAbortController();
   const caller: Fetch = async function caller(
     url: string,
-    options: fetchOptions,
+    options: fetchOptions = {},
   ): Promise<Response> {
     try {
       const { timeout = 1000 } = params;

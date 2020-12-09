@@ -12,14 +12,14 @@ export interface decoratorOptions {
 }
 
 export interface fetchOptions {
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTIONS' | 'CONNECT' | 'TRACE';
-  mode: RequestMode;
-  cache: RequestCache;
-  credentials: RequestCredentials;
-  headers: Headers;
-  redirect: RequestRedirect;
-  referrerPolicy: 'no-referrer' | 'client';
-  body: string;
+  method?: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD' | 'OPTIONS' | 'CONNECT' | 'TRACE';
+  mode?: RequestMode;
+  cache?: RequestCache;
+  credentials?: RequestCredentials;
+  headers?: Headers;
+  redirect?: RequestRedirect;
+  referrerPolicy?: 'no-referrer' | 'client';
+  body?: string;
   signal?: AbortSignal;
 }
 
