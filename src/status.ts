@@ -9,7 +9,7 @@ function checkStatusRecursively<T extends () => void>(resolve: T): void {
     return;
   }
 
-  window.setTimeout(() => {
+  setTimeout(() => {
     checkStatusRecursively(resolve);
   }, 1000);
 }

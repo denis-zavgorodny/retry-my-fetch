@@ -5,5 +5,5 @@ export default {
   set: (controller: AbortController): void => {
     instance = controller;
   },
-  isAvailable: (): boolean => !!instance || !!window.AbortController,
+  isAvailable: (): boolean => !!instance || !!AbortController,
 };
