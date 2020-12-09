@@ -47,98 +47,193 @@ describe('retryMyFetch', () => {
       expect(sleep).not.toHaveBeenCalled();
     });
   });
-
-  describe('when first status `ok` is not true', () => {
-    describe('when max attempts are reached', () => {
-      beforeEach(() => {
-        fetchMock.mockResolvedValue({
+  describe('when useAbortController is turned on', () => {
+    let beforeRefetch;
+    beforeEach(() => {
+      beforeRefetch = jest.fn().mockResolvedValue('some new conf');
+      fetchMock
+        .mockResolvedValueOnce({
           ok: false,
           status: 400,
           toJSON: jest.fn().mockReturnValue({ status: 'fail' }),
+        })
+        .mockResolvedValue({
+          ok: true,
+          status: 200,
+          toJSON: jest.fn().mockReturnValue({ success: 'data' }),
         });
-        testFetch = retryMyFetch(fetchMock, {
-          maxTryCount: 3,
-        });
-      });
-      it('should resolve data like a fetch', async () => {
-        expect.assertions(1);
-        await expect(testFetch('/')).resolves.toEqual({
-          ok: false,
-          status: 400,
-          toJSON: expect.any(Function),
-        });
+      testFetch = retryMyFetch(fetchMock, {
+        beforeRefetch,
+        useAbortController: true,
+        maxTryCount: 3,
       });
     });
-    describe('when max attempts are not reached', () => {
-      describe('when beforeRefetch is passed', () => {
-        describe('when beforeRefetch is resolved', () => {
-          describe('when beforeRefetch returns value', () => {
-            let beforeRefetch;
-            beforeEach(() => {
-              beforeRefetch = jest.fn().mockResolvedValue('some new conf');
-              fetchMock
-                .mockResolvedValueOnce({
-                  ok: false,
-                  status: 400,
-                  toJSON: jest.fn().mockReturnValue({ status: 'fail' }),
-                })
-                .mockResolvedValue({
-                  ok: true,
-                  status: 200,
-                  toJSON: jest.fn().mockReturnValue({ success: 'data' }),
-                });
-              testFetch = retryMyFetch(fetchMock, {
-                beforeRefetch,
-                maxTryCount: 3,
-              });
-            });
-            afterEach(() => {
-              beforeRefetch.mockClear();
-            });
-            it('should call fetchMock', async () => {
-              await testFetch('/', 'some conf');
-              expect(fetchMock).toBeCalledTimes(2);
-              expect(fetchMock.mock.calls[0]).toEqual(['/', 'some conf']);
-              expect(fetchMock.mock.calls[1]).toEqual(['/', 'some new conf']);
-            });
-            it('should resolve data like a fetch', (done) => {
-              testFetch('/')
-                .then((response) => {
-                  expect(response).toEqual({
+    afterEach(() => {
+      beforeRefetch.mockClear();
+    });
+    it('should call fetchMock', async () => {
+      await testFetch('/');
+      expect(fetchMock).toBeCalledTimes(2);
+      // expect(fetchMock.mock.calls[0]).toEqual(['/', 'some conf']);
+      // expect(fetchMock.mock.calls[1]).toEqual(['/', 'some new conf']);
+    });
+  });
+  describe('when useAbortController is turned off', () => {
+    describe('when first status `ok` is not true', () => {
+      describe('when max attempts are reached', () => {
+        beforeEach(() => {
+          fetchMock.mockResolvedValue({
+            ok: false,
+            status: 400,
+            toJSON: jest.fn().mockReturnValue({ status: 'fail' }),
+          });
+          testFetch = retryMyFetch(fetchMock, {
+            maxTryCount: 3,
+          });
+        });
+        it('should resolve data like a fetch', async () => {
+          expect.assertions(1);
+          await expect(testFetch('/')).resolves.toEqual({
+            ok: false,
+            status: 400,
+            toJSON: expect.any(Function),
+          });
+        });
+      });
+      describe('when max attempts are not reached', () => {
+        describe('when beforeRefetch is passed', () => {
+          describe('when beforeRefetch is resolved', () => {
+            describe('when beforeRefetch returns value', () => {
+              let beforeRefetch;
+              beforeEach(() => {
+                beforeRefetch = jest.fn().mockResolvedValue('some new conf');
+                fetchMock
+                  .mockResolvedValueOnce({
+                    ok: false,
+                    status: 400,
+                    toJSON: jest.fn().mockReturnValue({ status: 'fail' }),
+                  })
+                  .mockResolvedValue({
                     ok: true,
                     status: 200,
-                    toJSON: expect.any(Function),
+                    toJSON: jest.fn().mockReturnValue({ success: 'data' }),
                   });
-                  return response.toJSON();
-                })
-                .then((data) => {
-                  expect(data).toEqual({
-                    success: 'data',
-                  });
-                  done();
+                testFetch = retryMyFetch(fetchMock, {
+                  beforeRefetch,
+                  maxTryCount: 3,
                 });
-            });
-            it('should call beforeRefetch twice', async () => {
-              await testFetch('/', {
-                some: 'options',
               });
-              expect(beforeRefetch).toBeCalledTimes(1);
-              expect(beforeRefetch).toHaveBeenNthCalledWith(
-                1,
-                '/',
-                {
+              afterEach(() => {
+                beforeRefetch.mockClear();
+              });
+              it('should call fetchMock', async () => {
+                await testFetch('/', 'some conf');
+                expect(fetchMock).toBeCalledTimes(2);
+                expect(fetchMock.mock.calls[0]).toEqual(['/', 'some conf']);
+                expect(fetchMock.mock.calls[1]).toEqual(['/', 'some new conf']);
+              });
+              it('should resolve data like a fetch', (done) => {
+                testFetch('/')
+                  .then((response) => {
+                    expect(response).toEqual({
+                      ok: true,
+                      status: 200,
+                      toJSON: expect.any(Function),
+                    });
+                    return response.toJSON();
+                  })
+                  .then((data) => {
+                    expect(data).toEqual({
+                      success: 'data',
+                    });
+                    done();
+                  });
+              });
+              it('should call beforeRefetch twice', async () => {
+                await testFetch('/', {
                   some: 'options',
-                },
-                400,
-                1,
-                false,
-              );
+                });
+                expect(beforeRefetch).toBeCalledTimes(1);
+                expect(beforeRefetch).toHaveBeenNthCalledWith(
+                  1,
+                  '/',
+                  {
+                    some: 'options',
+                  },
+                  400,
+                  1,
+                  false,
+                );
+              });
+            });
+            describe('when beforeRefetch does not return value', () => {
+              let beforeRefetch;
+              beforeEach(() => {
+                beforeRefetch = jest.fn().mockResolvedValue();
+                fetchMock
+                  .mockResolvedValueOnce({
+                    ok: false,
+                    status: 400,
+                    toJSON: jest.fn().mockReturnValue({ status: 'fail' }),
+                  })
+                  .mockResolvedValue({
+                    ok: true,
+                    status: 200,
+                    toJSON: jest.fn().mockReturnValue({ success: 'data' }),
+                  });
+                testFetch = retryMyFetch(fetchMock, {
+                  beforeRefetch,
+                  maxTryCount: 3,
+                });
+              });
+              afterEach(() => {
+                beforeRefetch.mockClear();
+              });
+              it('should call fetchMock', async () => {
+                await testFetch('/', 'some conf');
+                expect(fetchMock).toBeCalledTimes(2);
+                expect(fetchMock.mock.calls[0]).toEqual(['/', 'some conf']);
+                expect(fetchMock.mock.calls[1]).toEqual(['/', 'some conf']);
+              });
+              it('should resolve data like a fetch', (done) => {
+                testFetch('/')
+                  .then((response) => {
+                    expect(response).toEqual({
+                      ok: true,
+                      status: 200,
+                      toJSON: expect.any(Function),
+                    });
+                    return response.toJSON();
+                  })
+                  .then((data) => {
+                    expect(data).toEqual({
+                      success: 'data',
+                    });
+                    done();
+                  });
+              });
+              it('should call beforeRefetch twice', async () => {
+                await testFetch('/', {
+                  some: 'options',
+                });
+                expect(beforeRefetch).toBeCalledTimes(1);
+                expect(beforeRefetch).toHaveBeenNthCalledWith(
+                  1,
+                  '/',
+                  {
+                    some: 'options',
+                  },
+                  400,
+                  1,
+                  false,
+                );
+              });
             });
           });
-          describe('when beforeRefetch does not return value', () => {
+          describe('when beforeRefetch is rejected', () => {
             let beforeRefetch;
             beforeEach(() => {
-              beforeRefetch = jest.fn().mockResolvedValue();
+              beforeRefetch = jest.fn().mockRejectedValue(new Error('error'));
               fetchMock
                 .mockResolvedValueOnce({
                   ok: false,
@@ -157,6 +252,33 @@ describe('retryMyFetch', () => {
             });
             afterEach(() => {
               beforeRefetch.mockClear();
+            });
+            it('should reject with error', async () => {
+              expect.assertions(3);
+              await expect(testFetch('/', 'some other conf')).rejects.toEqual(new Error('error'));
+              expect(fetchMock).toBeCalledTimes(1);
+              expect(fetchMock).toBeCalledWith('/', 'some other conf');
+            });
+          });
+        });
+
+        describe('when beforeRefetch is not passed', () => {
+          describe('when timeout is not passed', () => {
+            beforeEach(() => {
+              fetchMock
+                .mockResolvedValueOnce({
+                  ok: false,
+                  status: 400,
+                  toJSON: jest.fn().mockReturnValue({ status: 'fail' }),
+                })
+                .mockResolvedValue({
+                  ok: true,
+                  status: 200,
+                  toJSON: jest.fn().mockReturnValue({ success: 'data' }),
+                });
+              testFetch = retryMyFetch(fetchMock, {
+                maxTryCount: 3,
+              });
             });
             it('should call fetchMock', async () => {
               await testFetch('/', 'some conf');
@@ -181,149 +303,59 @@ describe('retryMyFetch', () => {
                   done();
                 });
             });
-            it('should call beforeRefetch twice', async () => {
-              await testFetch('/', {
-                some: 'options',
-              });
-              expect(beforeRefetch).toBeCalledTimes(1);
-              expect(beforeRefetch).toHaveBeenNthCalledWith(
-                1,
-                '/',
-                {
-                  some: 'options',
-                },
-                400,
-                1,
-                false,
-              );
+            it('`sleep` should not be called', async () => {
+              await testFetch('/');
+              expect(sleep).toBeCalledTimes(1);
+              expect(sleep).toBeCalledWith(1000);
             });
           });
-        });
-        describe('when beforeRefetch is rejected', () => {
-          let beforeRefetch;
-          beforeEach(() => {
-            beforeRefetch = jest.fn().mockRejectedValue(new Error('error'));
-            fetchMock
-              .mockResolvedValueOnce({
-                ok: false,
-                status: 400,
-                toJSON: jest.fn().mockReturnValue({ status: 'fail' }),
-              })
-              .mockResolvedValue({
-                ok: true,
-                status: 200,
-                toJSON: jest.fn().mockReturnValue({ success: 'data' }),
-              });
-            testFetch = retryMyFetch(fetchMock, {
-              beforeRefetch,
-              maxTryCount: 3,
-            });
-          });
-          afterEach(() => {
-            beforeRefetch.mockClear();
-          });
-          it('should reject with error', async () => {
-            expect.assertions(3);
-            await expect(testFetch('/', 'some other conf')).rejects.toEqual(new Error('error'));
-            expect(fetchMock).toBeCalledTimes(1);
-            expect(fetchMock).toBeCalledWith('/', 'some other conf');
-          });
-        });
-      });
 
-      describe('when beforeRefetch is not passed', () => {
-        describe('when timeout is not passed', () => {
-          beforeEach(() => {
-            fetchMock
-              .mockResolvedValueOnce({
-                ok: false,
-                status: 400,
-                toJSON: jest.fn().mockReturnValue({ status: 'fail' }),
-              })
-              .mockResolvedValue({
-                ok: true,
-                status: 200,
-                toJSON: jest.fn().mockReturnValue({ success: 'data' }),
-              });
-            testFetch = retryMyFetch(fetchMock, {
-              maxTryCount: 3,
-            });
-          });
-          it('should call fetchMock', async () => {
-            await testFetch('/', 'some conf');
-            expect(fetchMock).toBeCalledTimes(2);
-            expect(fetchMock.mock.calls[0]).toEqual(['/', 'some conf']);
-            expect(fetchMock.mock.calls[1]).toEqual(['/', 'some conf']);
-          });
-          it('should resolve data like a fetch', (done) => {
-            testFetch('/')
-              .then((response) => {
-                expect(response).toEqual({
+          describe('when timeout is passed', () => {
+            beforeEach(() => {
+              fetchMock
+                .mockResolvedValueOnce({
+                  ok: false,
+                  status: 400,
+                  toJSON: jest.fn().mockReturnValue({ status: 'fail' }),
+                })
+                .mockResolvedValue({
                   ok: true,
                   status: 200,
-                  toJSON: expect.any(Function),
+                  toJSON: jest.fn().mockReturnValue({ success: 'data' }),
                 });
-                return response.toJSON();
-              })
-              .then((data) => {
-                expect(data).toEqual({
-                  success: 'data',
-                });
-                done();
+              testFetch = retryMyFetch(fetchMock, {
+                maxTryCount: 3,
+                timeout: 4000,
               });
-          });
-          it('`sleep` should not be called', async () => {
-            await testFetch('/');
-            expect(sleep).toBeCalledTimes(1);
-            expect(sleep).toBeCalledWith(1000);
-          });
-        });
-
-        describe('when timeout is passed', () => {
-          beforeEach(() => {
-            fetchMock
-              .mockResolvedValueOnce({
-                ok: false,
-                status: 400,
-                toJSON: jest.fn().mockReturnValue({ status: 'fail' }),
-              })
-              .mockResolvedValue({
-                ok: true,
-                status: 200,
-                toJSON: jest.fn().mockReturnValue({ success: 'data' }),
-              });
-            testFetch = retryMyFetch(fetchMock, {
-              maxTryCount: 3,
-              timeout: 4000,
             });
-          });
-          it('should call fetchMock', async () => {
-            await testFetch('/', 'some conf');
-            expect(fetchMock).toBeCalledTimes(2);
-            expect(fetchMock.mock.calls[0]).toEqual(['/', 'some conf']);
-            expect(fetchMock.mock.calls[1]).toEqual(['/', 'some conf']);
-          });
-          it('should resolve data like a fetch', (done) => {
-            testFetch('/')
-              .then((response) => {
-                expect(response).toEqual({
-                  ok: true,
-                  status: 200,
-                  toJSON: expect.any(Function),
+            it('should call fetchMock', async () => {
+              await testFetch('/', 'some conf');
+              expect(fetchMock).toBeCalledTimes(2);
+              expect(fetchMock.mock.calls[0]).toEqual(['/', 'some conf']);
+              expect(fetchMock.mock.calls[1]).toEqual(['/', 'some conf']);
+            });
+            it('should resolve data like a fetch', (done) => {
+              testFetch('/')
+                .then((response) => {
+                  expect(response).toEqual({
+                    ok: true,
+                    status: 200,
+                    toJSON: expect.any(Function),
+                  });
+                  return response.toJSON();
+                })
+                .then((data) => {
+                  expect(data).toEqual({
+                    success: 'data',
+                  });
+                  done();
                 });
-                return response.toJSON();
-              })
-              .then((data) => {
-                expect(data).toEqual({
-                  success: 'data',
-                });
-                done();
-              });
-          });
-          it('`sleep` should not be called', async () => {
-            await testFetch('/');
-            expect(sleep).toBeCalledTimes(1);
-            expect(sleep).toBeCalledWith(4000);
+            });
+            it('`sleep` should not be called', async () => {
+              await testFetch('/');
+              expect(sleep).toBeCalledTimes(1);
+              expect(sleep).toBeCalledWith(4000);
+            });
           });
         });
       });
