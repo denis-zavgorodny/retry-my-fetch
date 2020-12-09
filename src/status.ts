@@ -15,12 +15,12 @@ function checkStatusRecursively<T extends () => void>(resolve: T): void {
 }
 
 export default {
-  get: (): string => status,
+  isBusy: (): boolean => status === STATUS_BUSY,
   setBusy: (): void => {
-    status = 'BUSY';
+    status = STATUS_BUSY;
   },
   setIdle: (): void => {
-    status = 'IDLE';
+    status = STATUS_IDLE;
   },
   whenWillIdle: <T>(): Promise<T> =>
     new Promise((resolve) => {
