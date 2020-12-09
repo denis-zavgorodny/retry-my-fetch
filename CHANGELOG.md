@@ -1,8 +1,13 @@
 # Change Log
 
+## 1.2.1
+
+- add tests
+- pass empty object as default to second argument for `fetch` funciton in case if it is not set
+
 ## 1.2.0
 
-- use AbortController API
+- use `AbortController` API
 
 ## 1.1.0
 
