@@ -8,6 +8,7 @@ module.exports = {
     filename: 'index.js',
     library: 'retry-my-fetch',
     libraryTarget: 'umd',
+    globalObject: "(typeof self !== 'undefined' ? self : this)",
   },
   devtool: 'source-map',
   resolve: {

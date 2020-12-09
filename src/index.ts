@@ -7,6 +7,7 @@ import abortControllerInstance from './abort-controller/index';
 import handleAborted from './abort-controller/handle-aborted';
 import wasRequestRejected from './utils/was-request-rejected';
 import abortRequests from './utils/abort-requests';
+import nullRequest from './utils/null-request';
 
 function retryMyFetch(http: Fetch, params: decoratorOptions): Fetch {
   let counter = 0;
@@ -20,10 +21,13 @@ function retryMyFetch(http: Fetch, params: decoratorOptions): Fetch {
       const { timeout = 1000 } = params;
       const defaultRefreshCallback: beforeRefetchInterface = () => sleep(timeout);
       const { beforeRefetch = defaultRefreshCallback, maxTryCount = 5 } = params;
-      const data = await http(
-        url,
-        useAbortController ? injectAbortController(options) : options,
-      ).catch(handleAborted);
+      const isBusy: boolean = status.isBusy();
+
+      const data = isBusy
+        ? await nullRequest()
+        : await http(url, useAbortController ? injectAbortController(options) : options).catch(
+            handleAborted,
+          );
       counter += 1;
 
       if (data.ok === true || counter > maxTryCount) return data;

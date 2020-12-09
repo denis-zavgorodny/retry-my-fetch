@@ -1,5 +1,10 @@
 # Change Log
 
+## 1.3.0
+
+- build library in order to support `nodejs` runtime
+- handle cuncurrency
+
 ## 1.2.2
 
 - update publish script
