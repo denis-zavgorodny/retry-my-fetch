@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.2.2
+
+- update publish script
+
 ## 1.2.1
 
 - add tests
