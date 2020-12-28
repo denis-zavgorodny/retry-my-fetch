@@ -20,7 +20,7 @@ function retryMyFetch(http: Fetch, params: decoratorOptions): Fetch {
     try {
       const { timeout = 1000 } = params;
       const defaultRefreshCallback: beforeRefetchInterface = () => sleep(timeout);
-      const { beforeRefetch = defaultRefreshCallback, maxTryCount = 5 } = params;
+      const { beforeRefetch = defaultRefreshCallback, maxTryCount = 5, watchStatus } = params;
       const isBusy: boolean = status.isBusy();
 
       const data = isBusy
@@ -30,7 +30,12 @@ function retryMyFetch(http: Fetch, params: decoratorOptions): Fetch {
           );
       counter += 1;
 
-      if (data.ok === true || counter > maxTryCount) return data;
+      if (
+        (watchStatus && watchStatus === data.status) ||
+        (!watchStatus && data.ok === true) ||
+        counter > maxTryCount
+      )
+        return data;
 
       if (!wasRequestRejected(data) && abortControllerInstance.get()) {
         abortRequests();
