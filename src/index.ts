@@ -31,7 +31,7 @@ function retryMyFetch(http: Fetch, params: decoratorOptions): Fetch {
       counter += 1;
 
       if (
-        (watchStatus && watchStatus === data.status) ||
+        (watchStatus && watchStatus !== data.status) ||
         (!watchStatus && data.ok === true) ||
         counter > maxTryCount
       )
