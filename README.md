@@ -117,7 +117,7 @@ See `src/interfaces.ts` for further details.
 import retryMyFetch from 'retry-my-fetch';
 
 const config = {
-  doNotAbortIfStatuses: [401], // number[]
+  doNotRefetchIfStatuses: [401], // number[]
 };
 const fetchWithRetry = retryMyFetch(fetch, config);
 fetchWithRetry('/').then(console.log);

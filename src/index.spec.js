@@ -362,7 +362,7 @@ describe('retryMyFetch', () => {
       });
     });
   });
-  describe('when useAbortController is turned on and set doNotAbortIfStatuses', () => {
+  describe('when useAbortController is turned on and set doNotRefetchIfStatuses', () => {
     let beforeRefetch;
     beforeEach(() => {
       beforeRefetch = jest.fn().mockResolvedValue('some new conf');
@@ -373,7 +373,7 @@ describe('retryMyFetch', () => {
       });
       testFetch = retryMyFetch(fetchMock, {
         beforeRefetch,
-        doNotAbortIfStatuses: [401],
+        doNotRefetchIfStatuses: [401],
         maxTryCount: 3,
       });
     });

@@ -9,7 +9,7 @@ export interface decoratorOptions {
   maxTryCount?: number;
   timeout?: number;
   useAbortController?: boolean;
-  doNotAbortIfStatuses?: number[];
+  doNotRefetchIfStatuses?: number[];
 }
 
 export interface fetchOptions {
