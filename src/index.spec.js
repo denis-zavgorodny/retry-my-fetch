@@ -1,5 +1,6 @@
 import retryMyFetch from './index';
 import sleep from './utils/sleep';
+import { clearCount, getCount, increaseCount } from './utils/counter';
 
 jest.mock('./utils/sleep', () => jest.fn().mockResolvedValue());
 
@@ -359,6 +360,42 @@ describe('retryMyFetch', () => {
           });
         });
       });
+    });
+  });
+  describe('when useAbortController is turned on and set doNotAbortIfStatuses', () => {
+    let beforeRefetch;
+    beforeEach(() => {
+      beforeRefetch = jest.fn().mockResolvedValue('some new conf');
+      fetchMock.mockResolvedValueOnce({
+        ok: false,
+        status: 400,
+        toJSON: jest.fn().mockReturnValue({ status: 'fail' }),
+      });
+      testFetch = retryMyFetch(fetchMock, {
+        beforeRefetch,
+        doNotAbortIfStatuses: [401],
+        maxTryCount: 3,
+      });
+    });
+    afterEach(() => {
+      beforeRefetch.mockClear();
+    });
+    it('should call fetchMock 1 times', async () => {
+      await testFetch('/');
+      expect(fetchMock).toBeCalledTimes(1);
+    });
+  });
+  describe('counter', () => {
+    const urlApi = '/api/test/1';
+    it('increaseCount', async () => {
+      expect(increaseCount(urlApi)).toEqual(1);
+      expect(increaseCount(urlApi)).toEqual(2);
+    });
+    it('getCount', async () => {
+      expect(getCount(urlApi)).toEqual(2);
+    });
+    it('clearCount', async () => {
+      expect(clearCount(urlApi)).toEqual(0);
     });
   });
 });

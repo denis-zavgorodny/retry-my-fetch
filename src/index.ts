@@ -8,9 +8,9 @@ import handleAborted from './abort-controller/handle-aborted';
 import wasRequestRejected from './utils/was-request-rejected';
 import abortRequests from './utils/abort-requests';
 import nullRequest from './utils/null-request';
+import { clearCount, getCount, increaseCount } from './utils/counter';
 
 function retryMyFetch(http: Fetch, params: decoratorOptions): Fetch {
-  let counter = 0;
   const { useAbortController } = params;
   if (useAbortController) initAbortController();
   const caller: Fetch = async function caller(
@@ -20,7 +20,11 @@ function retryMyFetch(http: Fetch, params: decoratorOptions): Fetch {
     try {
       const { timeout = 1000 } = params;
       const defaultRefreshCallback: beforeRefetchInterface = () => sleep(timeout);
-      const { beforeRefetch = defaultRefreshCallback, maxTryCount = 5, watchStatus } = params;
+      const {
+        beforeRefetch = defaultRefreshCallback,
+        maxTryCount = 5,
+        doNotAbortIfStatuses,
+      } = params;
       const isBusy: boolean = status.isBusy();
 
       const data = isBusy
@@ -28,13 +32,14 @@ function retryMyFetch(http: Fetch, params: decoratorOptions): Fetch {
         : await http(url, useAbortController ? injectAbortController(options) : options).catch(
             handleAborted,
           );
-      counter += 1;
+      increaseCount(url);
 
       if (
-        (watchStatus && watchStatus !== data.status) ||
-        (!watchStatus && data.ok === true) ||
-        counter > maxTryCount
+        (doNotAbortIfStatuses && !doNotAbortIfStatuses.includes(data.status)) ||
+        data.ok === true ||
+        getCount(url) > maxTryCount
       ) {
+        clearCount(url);
         return data;
       }
 
@@ -48,7 +53,7 @@ function retryMyFetch(http: Fetch, params: decoratorOptions): Fetch {
         url,
         options,
         data.status,
-        counter,
+        getCount(url),
         wasRequestRejected(data),
       );
       status.setIdle();
