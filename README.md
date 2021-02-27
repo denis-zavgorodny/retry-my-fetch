@@ -111,13 +111,13 @@ fetchWithRetry('/', options).then(console.log);
 
 See `src/interfaces.ts` for further details.
 
-### Do not abort if statuses
+### Do not refetch if statuses
 
 ```js
 import retryMyFetch from 'retry-my-fetch';
 
 const config = {
-  doNotRefetchIfStatuses: [401], // number[]
+  doNotRefetchIfStatuses: [400], // number[]
 };
 const fetchWithRetry = retryMyFetch(fetch, config);
 fetchWithRetry('/').then(console.log);

@@ -373,7 +373,7 @@ describe('retryMyFetch', () => {
       });
       testFetch = retryMyFetch(fetchMock, {
         beforeRefetch,
-        doNotRefetchIfStatuses: [401],
+        doNotRefetchIfStatuses: [400],
         maxTryCount: 3,
       });
     });
