@@ -2,9 +2,9 @@ const counter = new Map();
 
 export const increaseCount = (url: string): void => {
   if (counter.has(url)) {
-    counter.set(url, 1);
-  } else {
     counter.set(url, counter.get(url) + 1);
+  } else {
+    counter.set(url, 1);
   }
 };
 

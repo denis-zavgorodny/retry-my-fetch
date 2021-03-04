@@ -23,7 +23,7 @@ function retryMyFetch(http: Fetch, params: decoratorOptions): Fetch {
       const {
         beforeRefetch = defaultRefreshCallback,
         maxTryCount = 5,
-        doNotRefetchIfStatuses,
+        doNotRetryIfStatuses,
       } = params;
       const isBusy: boolean = status.isBusy();
 
@@ -35,7 +35,7 @@ function retryMyFetch(http: Fetch, params: decoratorOptions): Fetch {
       increaseCount(url);
 
       if (
-        (doNotRefetchIfStatuses && !doNotRefetchIfStatuses.includes(data.status)) ||
+        (doNotRetryIfStatuses && doNotRetryIfStatuses.includes(data.status)) ||
         data.ok === true ||
         getCount(url) > maxTryCount
       ) {
