@@ -12,7 +12,7 @@
     "dev:watch": "webpack --mode development --progress --profile --colors --watch",
     "prettier": "npx prettier --write . ",
     "test": "jest",
-    "test:watch": "jest --watch src/index.spec.js"
+    "test:watch": "jest --watch"
   },
   "keywords": [
     "retry",
