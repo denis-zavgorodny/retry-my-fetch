@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.4.0
+
+- extend config with `doNotRetryIfStatuses` option
+
 ## 1.3.0
 
 - build library in order to support `nodejs` runtime
