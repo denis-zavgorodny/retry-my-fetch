@@ -5,5 +5,13 @@ export default {
   set: (controller: AbortController): void => {
     instance = controller;
   },
-  isAvailable: (): boolean => !!instance || !!AbortController,
+  isAvailable: (): boolean => {
+    let isAbortControllerAvailable;
+    try {
+      isAbortControllerAvailable = !!new AbortController();
+    } catch (_) {
+      isAbortControllerAvailable = false;
+    }
+    return !!instance || isAbortControllerAvailable;
+  },
 };
