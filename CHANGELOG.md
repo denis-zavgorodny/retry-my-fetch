@@ -1,5 +1,9 @@
 # Change Log
 
+## 1.4.1
+
+- fix `ReferenceError: AbortController is not defined` error for NodeJS less than v.15
+
 ## 1.4.0
 
 - extend config with `doNotRetryIfStatuses` option
